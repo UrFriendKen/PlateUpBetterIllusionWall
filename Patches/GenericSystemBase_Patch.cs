@@ -15,17 +15,17 @@ namespace KitchenBetterIllusionWall.Patches
 
         static MethodInfo m_GetEntityQuery = typeof(ComponentSystemBase).GetMethod("GetEntityQuery", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ComponentType[]) }, null);
 
-        [HarmonyPatch(typeof(GenericSystemBase), "CanReach")]
+        [HarmonyPatch(typeof(TileManager), "CanReach")]
         [HarmonyPostfix]
-        static void CanReach_Postfix(ref GenericSystemBase __instance, Vector3 from, Vector3 to, ref bool __result)
+        static void CanReach_Postfix(ref TileManager __instance, IntVector3 from, IntVector3 to, ref bool __result)
         {
             if (__result)
                 return;
 
-            Query = (EntityQuery)(m_GetEntityQuery?.Invoke(__instance, new object[] { new ComponentType[] { typeof(CReachabilityModifier), typeof(CPosition) } }));
-
             if (!Query.HasValue)
-                return;
+                Query = (EntityQuery)(m_GetEntityQuery?.Invoke(__instance, new object[] { new ComponentType[] { typeof(CReachabilityModifier), typeof(CPosition) } }));
+                if (!Query.HasValue)
+                    return;
 
             using NativeArray<CReachabilityModifier> modifiers = Query.Value.ToComponentDataArray<CReachabilityModifier>(Allocator.Temp);
             using NativeArray<CPosition> positions = Query.Value.ToComponentDataArray<CPosition>(Allocator.Temp);
@@ -35,10 +35,10 @@ namespace KitchenBetterIllusionWall.Patches
                 CReachabilityModifier modifier = modifiers[i];
                 CPosition position = positions[i];
 
-                Vector3 posFrom = position.Position;
-                Vector3 posTo = position.Position + modifier.Orientation.ToOffset();
+                IntVector3 posFrom = position.Position;
+                IntVector3 posTo = position.Position + modifier.Orientation.ToOffset();
 
-                if ((posFrom == from.Rounded() && posTo == to.Rounded()) || (modifier.TwoWay && (posFrom == to.Rounded() && posTo == from.Rounded())))
+                if ((posFrom == from && posTo == to) || (modifier.TwoWay && (posFrom == to && posTo == from)))
                 {
                     __result = true;
                     return;

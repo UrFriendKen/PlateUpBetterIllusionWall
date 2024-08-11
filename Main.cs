@@ -9,8 +9,8 @@ namespace KitchenBetterIllusionWall
     public class Main : IModInitializer
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
-        public const string MOD_NAME = "ModName";
-        public const string MOD_VERSION = "0.1.0";
+        public const string MOD_NAME = "BetterIllusionWall";
+        public const string MOD_VERSION = "0.1.1";
 
         public Main()
         {
